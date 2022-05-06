@@ -4,8 +4,8 @@
 
 <p align="center">
   <strong>
-    Go package that exposes a `Runner` interface for executing commands locally
-    via exec.Command.
+    Go package exposing a simple interface for executing commands, enabling easy
+    mocking and wrapping of executed commands.
   </strong>
 </p>
 

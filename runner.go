@@ -1,5 +1,5 @@
-// Package runner exposes a Runner interface for executing commands locally via
-// exec.Command.
+// Package runner exposes a simple interface for executing commands, enabling
+// easy mocking and wrapping of executed commands.
 //
 // It enables easy mocking of runners for testing purposes, and also for
 // wrapping a runner to modify the commands being executed, like passing all
