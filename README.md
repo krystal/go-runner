@@ -57,3 +57,7 @@ Output:
 Oh noes! :(
 Hello world!
 ```
+
+## License
+
+[MIT](https://github.com/krystal/go-runner/blob/main/LICENSE)
