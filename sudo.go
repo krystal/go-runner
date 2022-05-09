@@ -1,6 +1,9 @@
 package runner
 
-import "io"
+import (
+	"context"
+	"io"
+)
 
 // Sudo is a Runner that wraps another Runner and runs commands via sudo.
 //
@@ -29,6 +32,27 @@ func (r *Sudo) Run(
 	command string,
 	args ...string,
 ) error {
+	sudoArgs := r.args(command, args)
+
+	return r.Runner.Run(stdin, stdout, stderr, "sudo", sudoArgs...)
+}
+
+// RunContext executes the command via sudo by calling RunContext on the
+// underlying Runner. Will panic if Runner field is nil on Sudo instance.
+func (r *Sudo) RunContext(
+	ctx context.Context,
+	stdin io.Reader,
+	stdout io.Writer,
+	stderr io.Writer,
+	command string,
+	args ...string,
+) error {
+	sudoArgs := r.args(command, args)
+
+	return r.Runner.RunContext(ctx, stdin, stdout, stderr, "sudo", sudoArgs...)
+}
+
+func (r *Sudo) args(command string, args []string) []string {
 	sudoArgs := []string{"-n"}
 	if r.User != "" {
 		sudoArgs = append(sudoArgs, "-u", r.User)
@@ -37,7 +61,7 @@ func (r *Sudo) Run(
 	sudoArgs = append(sudoArgs, "--", command)
 	sudoArgs = append(sudoArgs, args...)
 
-	return r.Runner.Run(stdin, stdout, stderr, "sudo", sudoArgs...)
+	return sudoArgs
 }
 
 // Env sets the environment by calling Env on the underlying Runner. Will panic

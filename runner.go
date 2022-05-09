@@ -7,6 +7,7 @@
 package runner
 
 import (
+	"context"
 	"io"
 	"os/exec"
 )
@@ -22,6 +23,19 @@ type Runner interface {
 	// Stdout, and Stderr can be provided/captured if the io.Reader/Writer is
 	// not nil.
 	Run(
+		stdin io.Reader,
+		stdout io.Writer,
+		stderr io.Writer,
+		command string,
+		args ...string,
+	) error
+
+	// RunContext is like Run but includes a context.
+	//
+	// The provided context is used to kill the command process if the context
+	// becomes done before the command completes on its own.
+	RunContext(
+		ctx context.Context,
 		stdin io.Reader,
 		stdout io.Writer,
 		stderr io.Writer,
@@ -65,6 +79,33 @@ func (r *Local) Run(
 	command string,
 	args ...string,
 ) error {
+	cmd := exec.Command(command, args...)
+
+	return r.run(cmd, stdin, stdout, stderr)
+}
+
+// RunContext executes the given command locally on the host machine, using the
+// provided context to kill the process if the context becomes done before the
+// command completes on its own.
+func (r *Local) RunContext(
+	ctx context.Context,
+	stdin io.Reader,
+	stdout io.Writer,
+	stderr io.Writer,
+	command string,
+	args ...string,
+) error {
+	cmd := exec.CommandContext(ctx, command, args...)
+
+	return r.run(cmd, stdin, stdout, stderr)
+}
+
+func (r *Local) run(
+	cmd *exec.Cmd,
+	stdin io.Reader,
+	stdout io.Writer,
+	stderr io.Writer,
+) error {
 	if stdout == nil {
 		stdout = io.Discard
 	}
@@ -72,7 +113,6 @@ func (r *Local) Run(
 		stderr = io.Discard
 	}
 
-	cmd := exec.Command(command, args...)
 	cmd.Stdout = stdout
 	cmd.Stderr = stderr
 	cmd.Env = r.env

@@ -2,7 +2,9 @@ package runner_test
 
 import (
 	"bytes"
+	"context"
 	"fmt"
+	"time"
 
 	"github.com/krystal/go-runner"
 )
@@ -126,4 +128,47 @@ func ExampleRunner_failure() {
 
 	// Output:
 	// exit status 3: Oh noes! :(
+}
+
+func ExampleRunner_context() {
+	var stdout bytes.Buffer
+
+	ctx, cancel := context.WithTimeout(
+		context.Background(), 1*time.Second,
+	)
+	defer cancel()
+
+	r := runner.New()
+	err := r.RunContext(
+		ctx, nil, &stdout, nil,
+		"sh", "-c", "sleep 0.5 && echo 'Hello world!'",
+	)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Print(stdout.String())
+	// Output:
+	// Hello world!
+}
+
+func ExampleRunner_contextTimeout() {
+	var stdout, stderr bytes.Buffer
+
+	ctx, cancel := context.WithTimeout(
+		context.Background(), 100*time.Millisecond,
+	)
+	defer cancel()
+
+	r := runner.New()
+	err := r.RunContext(
+		ctx, nil, &stdout, &stderr,
+		"sh", "-c", "sleep 0.5 && echo 'Hello world!'",
+	)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	// Output:
+	// signal: killed
 }

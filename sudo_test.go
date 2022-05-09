@@ -2,11 +2,13 @@ package runner
 
 import (
 	"bytes"
+	"context"
 	"io"
 	"testing"
 
 	"github.com/golang/mock/gomock"
 	mock_runner "github.com/krystal/go-runner/mock"
+	"github.com/romdo/gomockctx"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -144,6 +146,164 @@ func TestSudo_Run(t *testing.T) {
 			}
 
 			err := s.Run(
+				tt.args.stdin,
+				tt.args.stdout,
+				tt.args.stderr,
+				tt.args.command,
+				tt.args.args...,
+			)
+
+			assert.Equal(t, tt.wantErr, err)
+		})
+	}
+}
+
+func TestSudo_RunContext(t *testing.T) {
+	ctx := gomockctx.New(context.Background())
+	// ctx2 := gomockctx.New(context.Background())
+
+	type fields struct {
+		User string
+		Args []string
+	}
+	type args struct {
+		ctx     context.Context
+		stdin   io.Reader
+		stdout  io.Writer
+		stderr  io.Writer
+		command string
+		args    []string
+	}
+	tests := []struct {
+		name        string
+		fields      fields
+		args        args
+		err         error
+		wantCommand string
+		wantArgs    []string
+		wantErr     error
+	}{
+		{
+			name:   "sudo",
+			fields: fields{},
+			args: args{
+				ctx:     ctx,
+				stdin:   nil,
+				stdout:  &bytes.Buffer{},
+				stderr:  &bytes.Buffer{},
+				command: "docker",
+				args:    []string{"ps", "-a"},
+			},
+			wantCommand: "sudo",
+			wantArgs:    []string{"-n", "--", "docker", "ps", "-a"},
+		},
+		{
+			name:   "stdin",
+			fields: fields{},
+			args: args{
+				ctx:     ctx,
+				stdin:   bytes.NewBufferString("foo\nbar"),
+				stdout:  &bytes.Buffer{},
+				stderr:  &bytes.Buffer{},
+				command: "docker",
+				args:    []string{"kill", "-s", "HUP"},
+			},
+			wantCommand: "sudo",
+			wantArgs:    []string{"-n", "--", "docker", "kill", "-s", "HUP"},
+		},
+		{
+			name:   "discard stdout and stderr",
+			fields: fields{},
+			args: args{
+				ctx:     ctx,
+				stdin:   nil,
+				stdout:  &bytes.Buffer{},
+				stderr:  &bytes.Buffer{},
+				command: "docker",
+				args:    []string{"stop", "foo"},
+			},
+			wantCommand: "sudo",
+			wantArgs:    []string{"-n", "--", "docker", "stop", "foo"},
+		},
+		{
+			name: "with User",
+			fields: fields{
+				User: "barfoo",
+			},
+			args: args{
+				ctx:     ctx,
+				stdin:   nil,
+				stdout:  &bytes.Buffer{},
+				stderr:  &bytes.Buffer{},
+				command: "docker",
+				args:    []string{"ps", "-a"},
+			},
+			wantCommand: "sudo",
+			wantArgs: []string{
+				"-n", "-u", "barfoo", "--", "docker", "ps", "-a",
+			},
+		},
+		{
+			name: "with Args",
+			fields: fields{
+				Args: []string{"-g", "other", "-d", "/opt/thing/data"},
+			},
+			args: args{
+				ctx:     ctx,
+				stdin:   nil,
+				stdout:  &bytes.Buffer{},
+				stderr:  &bytes.Buffer{},
+				command: "docker",
+				args:    []string{"ps", "-a"},
+			},
+			wantCommand: "sudo",
+			wantArgs: []string{
+				"-n", "-g", "other", "-d", "/opt/thing/data",
+				"--", "docker", "ps", "-a",
+			},
+		},
+		{
+			name: "with User and Args",
+			fields: fields{
+				User: "barfoo",
+				Args: []string{"-g", "other", "-d", "/opt/thing/data"},
+			},
+			args: args{
+				ctx:     ctx,
+				stdin:   nil,
+				stdout:  &bytes.Buffer{},
+				stderr:  &bytes.Buffer{},
+				command: "docker",
+				args:    []string{"ps", "-a"},
+			},
+			wantCommand: "sudo",
+			wantArgs: []string{
+				"-n", "-u", "barfoo", "-g", "other", "-d", "/opt/thing/data",
+				"--", "docker", "ps", "-a",
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			r := mock_runner.NewMockRunner(ctrl)
+			r.EXPECT().RunContext(
+				gomockctx.Eq(tt.args.ctx),
+				tt.args.stdin,
+				tt.args.stdout,
+				tt.args.stderr,
+				tt.wantCommand,
+				tt.wantArgs,
+			).Return(tt.err)
+
+			s := &Sudo{
+				Runner: r,
+				User:   tt.fields.User,
+				Args:   tt.fields.Args,
+			}
+
+			err := s.RunContext(
+				tt.args.ctx,
 				tt.args.stdin,
 				tt.args.stdout,
 				tt.args.stderr,

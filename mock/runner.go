@@ -5,6 +5,7 @@
 package mock_runner
 
 import (
+	context "context"
 	io "io"
 	reflect "reflect"
 
@@ -67,4 +68,23 @@ func (mr *MockRunnerMockRecorder) Run(stdin, stdout, stderr, command interface{}
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{stdin, stdout, stderr, command}, args...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Run", reflect.TypeOf((*MockRunner)(nil).Run), varargs...)
+}
+
+// RunContext mocks base method.
+func (m *MockRunner) RunContext(ctx context.Context, stdin io.Reader, stdout, stderr io.Writer, command string, args ...string) error {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, stdin, stdout, stderr, command}
+	for _, a := range args {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RunContext", varargs...)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// RunContext indicates an expected call of RunContext.
+func (mr *MockRunnerMockRecorder) RunContext(ctx, stdin, stdout, stderr, command interface{}, args ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, stdin, stdout, stderr, command}, args...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RunContext", reflect.TypeOf((*MockRunner)(nil).RunContext), varargs...)
 }
