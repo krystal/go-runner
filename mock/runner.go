@@ -34,6 +34,22 @@ func (m *MockRunner) EXPECT() *MockRunnerMockRecorder {
 	return m.recorder
 }
 
+// Env mocks base method.
+func (m *MockRunner) Env(env ...string) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{}
+	for _, a := range env {
+		varargs = append(varargs, a)
+	}
+	m.ctrl.Call(m, "Env", varargs...)
+}
+
+// Env indicates an expected call of Env.
+func (mr *MockRunnerMockRecorder) Env(env ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Env", reflect.TypeOf((*MockRunner)(nil).Env), env...)
+}
+
 // Run mocks base method.
 func (m *MockRunner) Run(stdin io.Reader, stdout, stderr io.Writer, command string, args ...string) error {
 	m.ctrl.T.Helper()

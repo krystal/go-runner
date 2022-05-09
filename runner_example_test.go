@@ -18,6 +18,18 @@ func ExampleRunner_basic() {
 	// Hello world!
 }
 
+func ExampleRunner_environment() {
+	var stdout bytes.Buffer
+
+	r := runner.New()
+	r.Env("USER=johndoe", "EMAIL=john@doe.io")
+	_ = r.Run(nil, &stdout, nil, "sh", "-c", `echo "Hi, ${USER} (${EMAIL})"`)
+
+	fmt.Print(stdout.String())
+	// Output:
+	// Hi, johndoe (john@doe.io)
+}
+
 func ExampleRunner_stdin() {
 	var stdout bytes.Buffer
 

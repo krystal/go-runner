@@ -18,6 +18,9 @@ import (
 // testing, or a different runner that executes givens commands in a different
 // manner.
 type Runner interface {
+	// Run executes the given command with any provided arguments. Stdin,
+	// Stdout, and Stderr can be provided/captured if the io.Reader/Writer is
+	// not nil.
 	Run(
 		stdin io.Reader,
 		stdout io.Writer,
@@ -25,11 +28,26 @@ type Runner interface {
 		command string,
 		args ...string,
 	) error
+
+	// Env specifies the environment variables which will be available to all
+	// commands invoked by the runner. Each entry is of the form "key=value".
+	// Entries with duplicate keys will cause all but the last to be ignored.
+	//
+	// Multiple calls to Env will overwrite any previous calls to Env.
+	//
+	// If no env is set, no environment variables will be set for executed
+	// commands.
+	//
+	// To set the environment to match that of the Go runtime, call Env with
+	// os.Environ().
+	Env(env ...string)
 }
 
 // Local is a Runner implementation that executes commands locally on the
 // host machine.
-type Local struct{}
+type Local struct {
+	env []string
+}
 
 var _ Runner = &Local{}
 
@@ -57,9 +75,16 @@ func (r *Local) Run(
 	cmd := exec.Command(command, args...)
 	cmd.Stdout = stdout
 	cmd.Stderr = stderr
+	cmd.Env = r.env
 	if stdin != nil {
 		cmd.Stdin = stdin
 	}
 
 	return cmd.Run()
+}
+
+// Env sets the environment which will apply to all commands invoked by the
+// runner. Each entry is of the form "key=value".
+func (r *Local) Env(env ...string) {
+	r.env = env
 }

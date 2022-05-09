@@ -155,3 +155,51 @@ func TestSudo_Run(t *testing.T) {
 		})
 	}
 }
+
+func TestSudo_Env(t *testing.T) {
+	type args struct {
+		env []string
+	}
+	tests := []struct {
+		name string
+		args args
+	}{
+		{
+			name: "empty",
+			args: args{
+				env: []string{},
+			},
+		},
+		{
+			name: "one var",
+			args: args{
+				env: []string{
+					"foo=bar",
+				},
+			},
+		},
+		{
+			name: "many vars",
+			args: args{
+				env: []string{
+					"foo=bar",
+					"foo=bar",
+					"foz=baz",
+					"nope=why",
+					"hello=world",
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			r := mock_runner.NewMockRunner(ctrl)
+			r.EXPECT().Env(tt.args.env)
+
+			s := &Sudo{Runner: r}
+
+			s.Env(tt.args.env...)
+		})
+	}
+}

@@ -29,6 +29,7 @@ func TestLocal_Run(t *testing.T) {
 
 	tests := []struct {
 		name          string
+		env           []string
 		stdin         []byte
 		command       string
 		args          []string
@@ -90,6 +91,36 @@ cat
 			},
 			wantStdout: []byte("hello world again\nthis is some stdin text"),
 			wantStderr: []byte("\n\noops broken\n\n\n"),
+		},
+		{
+			name:    "no env",
+			env:     []string{},
+			command: "sh",
+			args: []string{
+				"-c", `echo "HOME: $HOME"
+echo "USER: $USER"
+`,
+			},
+			wantStdout: []byte("HOME: \nUSER: \n"),
+		},
+		{
+			name:    "with env",
+			env:     []string{"API_KEY=12345", "PORT=8080"},
+			command: "sh",
+			args: []string{
+				"-c",
+				`echo "PORT: $PORT"
+echo "API_KEY: $API_KEY"
+`,
+			},
+			wantStdout: []byte("PORT: 8080\nAPI_KEY: 12345\n"),
+		},
+		{
+			name:       "duplicate env",
+			env:        []string{"PORT=8080", "PORT=9090"},
+			command:    "sh",
+			args:       []string{"-c", `echo "PORT: $PORT"`},
+			wantStdout: []byte("PORT: 9090\n"),
 		},
 		{
 			name:    "error with no output",
@@ -172,7 +203,9 @@ exit 84
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r := &Local{}
+			r := &Local{
+				env: tt.env,
+			}
 			var stdin io.Reader
 			if tt.stdin != nil {
 				stdin = bytes.NewBuffer(tt.stdin)
@@ -211,6 +244,56 @@ exit 84
 				require.NoError(t, err)
 				assert.Equal(t, tt.wantStderr, b)
 			}
+		})
+	}
+}
+
+func TestLocal_Env(t *testing.T) {
+	type fields struct {
+		env []string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		env    []string
+		want   []string
+	}{
+		{
+			name:   "empty",
+			fields: fields{},
+			env:    []string{},
+			want:   []string{},
+		},
+		{
+			name:   "set one",
+			fields: fields{},
+			env:    []string{"foo=bar"},
+			want:   []string{"foo=bar"},
+		},
+		{
+			name:   "set many",
+			fields: fields{},
+			env:    []string{"foo=bar", "HELLO=WORLD", "API_KEY=12345"},
+			want:   []string{"foo=bar", "HELLO=WORLD", "API_KEY=12345"},
+		},
+		{
+			name: "overwrite",
+			fields: fields{
+				env: []string{"hi=bye"},
+			},
+			env:  []string{"foo=bar", "HELLO=WORLD", "API_KEY=12345"},
+			want: []string{"foo=bar", "HELLO=WORLD", "API_KEY=12345"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := &Local{
+				env: tt.fields.env,
+			}
+
+			r.Env(tt.env...)
+
+			assert.Equal(t, tt.want, r.env)
 		})
 	}
 }
