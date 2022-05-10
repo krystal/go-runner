@@ -49,31 +49,31 @@ jobs:
       - name: Check if generate results are up to date
         run: make check-generate
 
-  # cov:
-  #   name: Coverage
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v2
-  #     - uses: actions/setup-go@v2
-  #       with:
-  #         go-version: 1.16
-  #     - uses: actions/cache@v2
-  #       with:
-  #         path: ~/go/pkg/mod
-  #         key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-  #         restore-keys: |
-  #           ${{ runner.os }}-go-
-  #     - name: Publish coverage
-  #       uses: paambaati/codeclimate-action@v3.0.0
-  #       env:
-  #         VERBOSE: "true"
-  #         GOMAXPROCS: 4
-  #         CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
-  #       with:
-  #         coverageCommand: make cov
-  #         prefix: github.com/${{ github.repository }}
-  #         coverageLocations: |
-  #           ${{ github.workspace }}/coverage.out:gocov
+  cov:
+    name: Coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+        with:
+          go-version: 1.16
+      - uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+      - name: Publish coverage
+        uses: paambaati/codeclimate-action@v3.0.0
+        env:
+          VERBOSE: "true"
+          GOMAXPROCS: 4
+          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+        with:
+          coverageCommand: make cov
+          prefix: github.com/${{ github.repository }}
+          coverageLocations: |
+            ${{ github.workspace }}/coverage.out:gocov
 
   test:
     name: Test

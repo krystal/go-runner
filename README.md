@@ -20,6 +20,9 @@
   <a href="https://github.com/krystal/go-runner/actions">
     <img src="https://img.shields.io/github/workflow/status/krystal/go-runner/CI.svg?logo=github" alt="Actions Status">
   </a>
+  <a href="https://codeclimate.com/github/krystal/go-runner">
+    <img src="https://img.shields.io/codeclimate/coverage/krystal/go-runner.svg?logo=code%20climate" alt="Coverage">
+  </a>
   <a href="https://github.com/krystal/go-runner/commits/main">
     <img src="https://img.shields.io/github/last-commit/krystal/go-runner.svg?style=flat&logo=github&logoColor=white"
 alt="GitHub last commit">
