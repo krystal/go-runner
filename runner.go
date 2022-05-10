@@ -1,9 +1,11 @@
 // Package runner exposes a simple interface for executing commands, enabling
 // easy mocking and wrapping of executed commands.
 //
-// It enables easy mocking of runners for testing purposes, and also for
-// wrapping a runner to modify the commands being executed, like passing all
-// commands through sudo for example.
+// The Runner interface is basic and minimal, but it is sufficient for most use
+// cases. This makes it easy to mock Runner for testing purposes.
+//
+// It's also easy to create wrapper runners which modify commands before
+// executing them. The Sudo struct is a simple example of this.
 package runner
 
 import (
@@ -24,8 +26,7 @@ type Runner interface {
 	// not nil.
 	Run(
 		stdin io.Reader,
-		stdout io.Writer,
-		stderr io.Writer,
+		stdout, stderr io.Writer,
 		command string,
 		args ...string,
 	) error
@@ -37,8 +38,7 @@ type Runner interface {
 	RunContext(
 		ctx context.Context,
 		stdin io.Reader,
-		stdout io.Writer,
-		stderr io.Writer,
+		stdout, stderr io.Writer,
 		command string,
 		args ...string,
 	) error
