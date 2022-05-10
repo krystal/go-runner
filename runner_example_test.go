@@ -2,7 +2,9 @@ package runner_test
 
 import (
 	"bytes"
+	"context"
 	"fmt"
+	"time"
 
 	"github.com/krystal/go-runner"
 )
@@ -16,6 +18,18 @@ func ExampleRunner_basic() {
 	fmt.Print(stdout.String())
 	// Output:
 	// Hello world!
+}
+
+func ExampleRunner_environment() {
+	var stdout bytes.Buffer
+
+	r := runner.New()
+	r.Env("USER=johndoe", "EMAIL=john@doe.io")
+	_ = r.Run(nil, &stdout, nil, "sh", "-c", `echo "Hi, ${USER} (${EMAIL})"`)
+
+	fmt.Print(stdout.String())
+	// Output:
+	// Hi, johndoe (john@doe.io)
 }
 
 func ExampleRunner_stdin() {
@@ -114,4 +128,47 @@ func ExampleRunner_failure() {
 
 	// Output:
 	// exit status 3: Oh noes! :(
+}
+
+func ExampleRunner_context() {
+	var stdout bytes.Buffer
+
+	ctx, cancel := context.WithTimeout(
+		context.Background(), 1*time.Second,
+	)
+	defer cancel()
+
+	r := runner.New()
+	err := r.RunContext(
+		ctx, nil, &stdout, nil,
+		"sh", "-c", "sleep 0.5 && echo 'Hello world!'",
+	)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Print(stdout.String())
+	// Output:
+	// Hello world!
+}
+
+func ExampleRunner_contextTimeout() {
+	var stdout, stderr bytes.Buffer
+
+	ctx, cancel := context.WithTimeout(
+		context.Background(), 100*time.Millisecond,
+	)
+	defer cancel()
+
+	r := runner.New()
+	err := r.RunContext(
+		ctx, nil, &stdout, &stderr,
+		"sh", "-c", "sleep 0.5 && echo 'Hello world!'",
+	)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	// Output:
+	// signal: killed
 }
