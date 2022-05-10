@@ -24,12 +24,12 @@ func ExampleRunner_environment() {
 	var stdout bytes.Buffer
 
 	r := runner.New()
-	r.Env("USER=johndoe", "EMAIL=john@doe.io")
-	_ = r.Run(nil, &stdout, nil, "sh", "-c", `echo "Hi, ${USER} (${EMAIL})"`)
+	r.Env("USER=johndoe", "HOME=/home/johnny")
+	_ = r.Run(nil, &stdout, nil, "sh", "-c", `echo "Hi, ${USER} (${HOME})"`)
 
 	fmt.Print(stdout.String())
 	// Output:
-	// Hi, johndoe (john@doe.io)
+	// Hi, johndoe (/home/johnny)
 }
 
 func ExampleRunner_stdin() {
