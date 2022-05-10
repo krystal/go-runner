@@ -16,10 +16,9 @@ import (
 
 //go:generate mockgen -source=$GOFILE -destination=mock/${GOFILE}
 
-// Runner is the interface that Manager uses internally to run commands. This
-// makes it easy to replace the underlying command runner with a mock for
-// testing, or a different runner that executes givens commands in a different
-// manner.
+// Runner is the interface that all runner structs implements. It makes it easy
+// to replace the underlying command runner with a mock for testing, or a
+// different runner that executes givens commands in a different manner.
 type Runner interface {
 	// Run executes the given command with any provided arguments. Stdin,
 	// Stdout, and Stderr can be provided/captured if the io.Reader/Writer is
