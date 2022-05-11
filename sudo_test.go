@@ -3,6 +3,7 @@ package runner
 import (
 	"bytes"
 	"context"
+	"errors"
 	"io"
 	"testing"
 
@@ -31,7 +32,7 @@ func TestSudo_Run(t *testing.T) {
 		err         error
 		wantCommand string
 		wantArgs    []string
-		wantErr     error
+		wantErr     string
 	}{
 		{
 			name:   "sudo",
@@ -51,8 +52,8 @@ func TestSudo_Run(t *testing.T) {
 			fields: fields{},
 			args: args{
 				stdin:   bytes.NewBufferString("foo\nbar"),
-				stdout:  &bytes.Buffer{},
-				stderr:  &bytes.Buffer{},
+				stdout:  nil,
+				stderr:  nil,
 				command: "docker",
 				args:    []string{"kill", "-s", "HUP"},
 			},
@@ -60,11 +61,24 @@ func TestSudo_Run(t *testing.T) {
 			wantArgs:    []string{"-n", "--", "docker", "kill", "-s", "HUP"},
 		},
 		{
-			name:   "discard stdout and stderr",
+			name:   "stdout",
 			fields: fields{},
 			args: args{
 				stdin:   nil,
 				stdout:  &bytes.Buffer{},
+				stderr:  nil,
+				command: "docker",
+				args:    []string{"stop", "foo"},
+			},
+			wantCommand: "sudo",
+			wantArgs:    []string{"-n", "--", "docker", "stop", "foo"},
+		},
+		{
+			name:   "stderr",
+			fields: fields{},
+			args: args{
+				stdin:   nil,
+				stdout:  nil,
 				stderr:  &bytes.Buffer{},
 				command: "docker",
 				args:    []string{"stop", "foo"},
@@ -125,6 +139,21 @@ func TestSudo_Run(t *testing.T) {
 				"-n", "-u", "barfoo", "-g", "other", "-d", "/opt/thing/data",
 				"--", "docker", "ps", "-a",
 			},
+		},
+		{
+			name:   "error",
+			fields: fields{},
+			args: args{
+				stdin:   nil,
+				stdout:  &bytes.Buffer{},
+				stderr:  &bytes.Buffer{},
+				command: "zfs",
+				args:    []string{"list"},
+			},
+			err:         errors.New("zfs: command not found"),
+			wantCommand: "sudo",
+			wantArgs:    []string{"-n", "--", "zfs", "list"},
+			wantErr:     "zfs: command not found",
 		},
 	}
 	for _, tt := range tests {
@@ -153,14 +182,17 @@ func TestSudo_Run(t *testing.T) {
 				tt.args.args...,
 			)
 
-			assert.Equal(t, tt.wantErr, err)
+			if tt.wantErr != "" {
+				assert.EqualError(t, err, tt.wantErr)
+			} else {
+				assert.NoError(t, err)
+			}
 		})
 	}
 }
 
 func TestSudo_RunContext(t *testing.T) {
 	ctx := gomockctx.New(context.Background())
-	// ctx2 := gomockctx.New(context.Background())
 
 	type fields struct {
 		User string
@@ -181,7 +213,7 @@ func TestSudo_RunContext(t *testing.T) {
 		err         error
 		wantCommand string
 		wantArgs    []string
-		wantErr     error
+		wantErr     string
 	}{
 		{
 			name:   "sudo",
@@ -203,8 +235,8 @@ func TestSudo_RunContext(t *testing.T) {
 			args: args{
 				ctx:     ctx,
 				stdin:   bytes.NewBufferString("foo\nbar"),
-				stdout:  &bytes.Buffer{},
-				stderr:  &bytes.Buffer{},
+				stdout:  nil,
+				stderr:  nil,
 				command: "docker",
 				args:    []string{"kill", "-s", "HUP"},
 			},
@@ -212,12 +244,26 @@ func TestSudo_RunContext(t *testing.T) {
 			wantArgs:    []string{"-n", "--", "docker", "kill", "-s", "HUP"},
 		},
 		{
-			name:   "discard stdout and stderr",
+			name:   "stdout",
 			fields: fields{},
 			args: args{
 				ctx:     ctx,
 				stdin:   nil,
 				stdout:  &bytes.Buffer{},
+				stderr:  nil,
+				command: "docker",
+				args:    []string{"stop", "foo"},
+			},
+			wantCommand: "sudo",
+			wantArgs:    []string{"-n", "--", "docker", "stop", "foo"},
+		},
+		{
+			name:   "stderr",
+			fields: fields{},
+			args: args{
+				ctx:     ctx,
+				stdin:   nil,
+				stdout:  nil,
 				stderr:  &bytes.Buffer{},
 				command: "docker",
 				args:    []string{"stop", "foo"},
@@ -281,6 +327,22 @@ func TestSudo_RunContext(t *testing.T) {
 				"-n", "-u", "barfoo", "-g", "other", "-d", "/opt/thing/data",
 				"--", "docker", "ps", "-a",
 			},
+		},
+		{
+			name:   "error",
+			fields: fields{},
+			args: args{
+				ctx:     ctx,
+				stdin:   nil,
+				stdout:  &bytes.Buffer{},
+				stderr:  &bytes.Buffer{},
+				command: "zfs",
+				args:    []string{"list"},
+			},
+			err:         errors.New("zfs: command not found"),
+			wantCommand: "sudo",
+			wantArgs:    []string{"-n", "--", "zfs", "list"},
+			wantErr:     "zfs: command not found",
 		},
 	}
 	for _, tt := range tests {
@@ -311,7 +373,11 @@ func TestSudo_RunContext(t *testing.T) {
 				tt.args.args...,
 			)
 
-			assert.Equal(t, tt.wantErr, err)
+			if tt.wantErr != "" {
+				assert.EqualError(t, err, tt.wantErr)
+			} else {
+				assert.NoError(t, err)
+			}
 		})
 	}
 }
