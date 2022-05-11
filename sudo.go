@@ -11,7 +11,7 @@ import (
 // the sudoers file before they can be run.
 type Sudo struct {
 	// Runner is the underlying Runner to run commands with, after wrapping them
-	// with sudo. Must be set, or Run will panic.
+	// with sudo. If not set, running commands will cause a panic.
 	Runner Runner
 
 	// User value passed to sudo via -u flag.
