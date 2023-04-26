@@ -10,6 +10,10 @@ import (
 // Password prompts are not supported, hence commands must be set to NOPASS via
 // the sudoers file before they can be run.
 type Sudo struct {
+	// env is a internal string slice of environment variables which are
+	// provided to the command being run in sudo.
+	env []string
+
 	// Runner is the underlying Runner to run commands with, after wrapping them
 	// with sudo. If not set, running commands will cause a panic.
 	Runner Runner
@@ -58,6 +62,10 @@ func (r *Sudo) args(command string, args []string) []string {
 		sudoArgs = append(sudoArgs, "-u", r.User)
 	}
 	sudoArgs = append(sudoArgs, r.Args...)
+
+	if len(r.env) > 0 {
+		sudoArgs = append(sudoArgs, r.env...)
+	}
 	sudoArgs = append(sudoArgs, "--", command)
 	sudoArgs = append(sudoArgs, args...)
 
@@ -66,6 +74,6 @@ func (r *Sudo) args(command string, args []string) []string {
 
 // Env sets the environment by calling Env on the underlying Runner. Will panic
 // if Runner field is nil on Sudo instance.
-func (r *Sudo) Env(vars ...string) {
-	r.Runner.Env(vars...)
+func (r *Sudo) Env(env ...string) {
+	r.env = env
 }

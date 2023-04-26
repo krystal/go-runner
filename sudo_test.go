@@ -27,6 +27,7 @@ func TestSudo_Run(t *testing.T) {
 	}
 	tests := []struct {
 		name        string
+		env         []string
 		fields      fields
 		args        args
 		err         error
@@ -104,6 +105,21 @@ func TestSudo_Run(t *testing.T) {
 			},
 		},
 		{
+			name: "with Env",
+			env:  []string{"FOO=BAR", "PORT=8080"},
+			args: args{
+				stdin:   nil,
+				stdout:  &bytes.Buffer{},
+				stderr:  &bytes.Buffer{},
+				command: "myapp",
+				args:    []string{"run", "-a"},
+			},
+			wantCommand: "sudo",
+			wantArgs: []string{
+				"-n", "FOO=BAR", "PORT=8080", "--", "myapp", "run", "-a",
+			},
+		},
+		{
 			name: "with Args",
 			fields: fields{
 				Args: []string{"-g", "other", "-d", "/opt/thing/data"},
@@ -122,7 +138,8 @@ func TestSudo_Run(t *testing.T) {
 			},
 		},
 		{
-			name: "with User and Args",
+			name: "with User, Args and Env",
+			env:  []string{"FOO=BAR", "PORT=8080"},
 			fields: fields{
 				User: "barfoo",
 				Args: []string{"-g", "other", "-d", "/opt/thing/data"},
@@ -137,7 +154,7 @@ func TestSudo_Run(t *testing.T) {
 			wantCommand: "sudo",
 			wantArgs: []string{
 				"-n", "-u", "barfoo", "-g", "other", "-d", "/opt/thing/data",
-				"--", "docker", "ps", "-a",
+				"FOO=BAR", "PORT=8080", "--", "docker", "ps", "-a",
 			},
 		},
 		{
@@ -174,6 +191,10 @@ func TestSudo_Run(t *testing.T) {
 				Args:   tt.fields.Args,
 			}
 
+			if len(tt.env) > 0 {
+				s.Env(tt.env...)
+			}
+
 			err := s.Run(
 				tt.args.stdin,
 				tt.args.stdout,
@@ -208,6 +229,7 @@ func TestSudo_RunContext(t *testing.T) {
 	}
 	tests := []struct {
 		name        string
+		env         []string
 		fields      fields
 		args        args
 		err         error
@@ -272,6 +294,22 @@ func TestSudo_RunContext(t *testing.T) {
 			wantArgs:    []string{"-n", "--", "docker", "stop", "foo"},
 		},
 		{
+			name: "with Env",
+			env:  []string{"FOO=BAR", "PORT=8080"},
+			args: args{
+				ctx:     ctx,
+				stdin:   nil,
+				stdout:  &bytes.Buffer{},
+				stderr:  &bytes.Buffer{},
+				command: "myapp",
+				args:    []string{"run", "-a"},
+			},
+			wantCommand: "sudo",
+			wantArgs: []string{
+				"-n", "FOO=BAR", "PORT=8080", "--", "myapp", "run", "-a",
+			},
+		},
+		{
 			name: "with User",
 			fields: fields{
 				User: "barfoo",
@@ -309,7 +347,8 @@ func TestSudo_RunContext(t *testing.T) {
 			},
 		},
 		{
-			name: "with User and Args",
+			name: "with User, Args and Env",
+			env:  []string{"FOO=BAR", "PORT=8080"},
 			fields: fields{
 				User: "barfoo",
 				Args: []string{"-g", "other", "-d", "/opt/thing/data"},
@@ -325,7 +364,7 @@ func TestSudo_RunContext(t *testing.T) {
 			wantCommand: "sudo",
 			wantArgs: []string{
 				"-n", "-u", "barfoo", "-g", "other", "-d", "/opt/thing/data",
-				"--", "docker", "ps", "-a",
+				"FOO=BAR", "PORT=8080", "--", "docker", "ps", "-a",
 			},
 		},
 		{
@@ -362,6 +401,10 @@ func TestSudo_RunContext(t *testing.T) {
 				Runner: r,
 				User:   tt.fields.User,
 				Args:   tt.fields.Args,
+			}
+
+			if len(tt.env) > 0 {
+				s.Env(tt.env...)
 			}
 
 			err := s.RunContext(
@@ -421,11 +464,11 @@ func TestSudo_Env(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			r := mock_runner.NewMockRunner(ctrl)
-			r.EXPECT().Env(tt.args.env)
 
 			s := &Sudo{Runner: r}
-
 			s.Env(tt.args.env...)
+
+			assert.Equal(t, tt.args.env, s.env)
 		})
 	}
 }
