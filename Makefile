@@ -45,7 +45,7 @@ endef
 $(eval $(call tool,godoc,golang.org/x/tools/cmd/godoc@latest))
 $(eval $(call tool,gofumpt,mvdan.cc/gofumpt@latest))
 $(eval $(call tool,goimports,golang.org/x/tools/cmd/goimports@latest))
-$(eval $(call tool,golangci-lint,github.com/golangci/golangci-lint/cmd/golangci-lint@v1.45))
+$(eval $(call tool,golangci-lint,github.com/golangci/golangci-lint/cmd/golangci-lint@v1.52))
 $(eval $(call tool,gomod,github.com/Helcaraxan/gomod@latest))
 $(eval $(call tool,mockgen,github.com/golang/mock/mockgen@v1.6.0))
 
@@ -74,7 +74,7 @@ test-deps:
 
 .PHONY: lint
 lint: $(TOOLDIR)/golangci-lint
-	golangci-lint $(V) run
+	golangci-lint $(V) run $(GOLANGCILINTARGS)
 
 .PHONY: format
 format: $(TOOLDIR)/goimports $(TOOLDIR)/gofumpt
