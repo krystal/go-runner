@@ -18,7 +18,7 @@
     <img src="https://img.shields.io/github/v/tag/krystal/go-runner?label=release" alt="GitHub tag (latest SemVer)">
   </a>
   <a href="https://github.com/krystal/go-runner/actions">
-    <img src="https://img.shields.io/github/workflow/status/krystal/go-runner/CI.svg?logo=github" alt="Actions Status">
+    <img src="https://img.shields.io/github/actions/workflow/status/krystal/go-runner/ci.yml?logo=github" alt="Actions Status">
   </a>
   <a href="https://codeclimate.com/github/krystal/go-runner">
     <img src="https://img.shields.io/codeclimate/coverage/krystal/go-runner.svg?logo=code%20climate" alt="Coverage">
