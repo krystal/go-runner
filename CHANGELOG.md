@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.3](https://github.com/krystal/go-runner/compare/v0.1.2...v0.1.3) (2023-04-28)
+
+
+### Bug Fixes
+
+* **sudo:** expose env to command being run instead of to sudo itself ([#6](https://github.com/krystal/go-runner/issues/6)) ([55175e8](https://github.com/krystal/go-runner/commit/55175e8eb044085648bfc5b11fc2264ce2b5d69e))
+
 ## [0.1.2](https://github.com/krystal/go-runner/compare/v0.1.1...v0.1.2) (2022-05-11)
 
 
