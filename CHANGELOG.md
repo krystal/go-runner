@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.4](https://github.com/krystal/go-runner/compare/v0.1.3...v0.1.4) (2023-04-28)
+
+
+### Features
+
+* **ssh-cli:** add ssh CLI based wrapper Runner implementation ([#9](https://github.com/krystal/go-runner/issues/9)) ([38c5d30](https://github.com/krystal/go-runner/commit/38c5d3092b83b9a8e407d81a4d04d39ac56bbd42))
+
 ## [0.1.3](https://github.com/krystal/go-runner/compare/v0.1.2...v0.1.3) (2023-04-28)
 
 
