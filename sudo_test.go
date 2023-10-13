@@ -7,10 +7,10 @@ import (
 	"io"
 	"testing"
 
-	"github.com/golang/mock/gomock"
 	mock_runner "github.com/krystal/go-runner/mock"
 	"github.com/romdo/gomockctx"
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/mock/gomock"
 )
 
 func TestSudo_Run(t *testing.T) {
