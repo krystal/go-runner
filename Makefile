@@ -47,7 +47,7 @@ $(eval $(call tool,gofumpt,mvdan.cc/gofumpt@latest))
 $(eval $(call tool,goimports,golang.org/x/tools/cmd/goimports@latest))
 $(eval $(call tool,golangci-lint,github.com/golangci/golangci-lint/cmd/golangci-lint@v1.54))
 $(eval $(call tool,gomod,github.com/Helcaraxan/gomod@latest))
-$(eval $(call tool,mockgen,github.com/golang/mock/mockgen@v1.6.0))
+$(eval $(call tool,mockgen,go.uber.org/mock/mockgen@v0.3.0))
 
 .PHONY: tools
 tools: $(TOOLS)
@@ -92,6 +92,10 @@ bench:
 .PHONY: generate
 generate: $(TOOLDIR)/mockgen
 	go generate ./...
+	@find . -type f -name '*.go' | while read -r file; do \
+		cat "$$file" | go run scripts/mockgen_fix.go > "$$file.tmp"; \
+		mv "$$file.tmp" "$$file"; \
+	done
 
 .PHONY: check-generate
 check-generate: $(TOOLDIR)/mockgen

@@ -3,9 +3,9 @@ module github.com/krystal/go-runner
 go 1.18
 
 require (
-	github.com/golang/mock v1.6.0
-	github.com/romdo/gomockctx v0.1.0
+	github.com/romdo/gomockctx v0.2.0
 	github.com/stretchr/testify v1.7.1
+	go.uber.org/mock v0.3.0
 )
 
 require (
