@@ -14,7 +14,7 @@ import (
 	"os/exec"
 )
 
-//go:generate mockgen -source=$GOFILE -destination=mock/${GOFILE}
+//go:generate go run github.com/golang/mock/mockgen@v1.6.0 -source=$GOFILE -destination=mock/${GOFILE}
 
 // Runner is the interface that all runner structs implements. It makes it easy
 // to replace the underlying command runner with a mock for testing, or a

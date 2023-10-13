@@ -24,8 +24,6 @@ linters:
   enable:
     - asciicheck
     - bodyclose
-    - deadcode
-    - depguard
     - durationcheck
     - errcheck
     - errorlint
@@ -58,13 +56,11 @@ linters:
     - rowserrcheck
     - sqlclosecheck
     - staticcheck
-    - structcheck
     - tparallel
     - typecheck
     - unconvert
     - unparam
     - unused
-    - varcheck
     - wastedassign
     - whitespace
 
