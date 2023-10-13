@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.2.0](https://github.com/krystal/go-runner/compare/v0.1.4...v0.2.0) (2023-10-13)
+
+
+### ⚠ BREAKING CHANGES
+
+* **deps:** switch to Uber's maintained fork of gomock ([#15](https://github.com/krystal/go-runner/issues/15))
+* **deps:** upgrade minimum Go version to 1.18 (from 1.16) ([#13](https://github.com/krystal/go-runner/issues/13))
+
+### Features
+
+* **deps:** switch to Uber's maintained fork of gomock ([#15](https://github.com/krystal/go-runner/issues/15)) ([522c71f](https://github.com/krystal/go-runner/commit/522c71f7017ec0c9f1b015b5b7e48cd527b2e343))
+* **deps:** upgrade minimum Go version to 1.18 (from 1.16) ([#13](https://github.com/krystal/go-runner/issues/13)) ([58c73d9](https://github.com/krystal/go-runner/commit/58c73d9eb0098bfc030b220c9153d4f656719135))
+
 ## [0.1.4](https://github.com/krystal/go-runner/compare/v0.1.3...v0.1.4) (2023-04-28)
 
 
